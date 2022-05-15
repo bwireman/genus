@@ -1,4 +1,5 @@
 import Config
 
 config :genus,
-  directory: "types"
+  directory: "types",
+  indent: "  "

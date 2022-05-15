@@ -48,21 +48,26 @@ defmodule Genus do
 
   defp as_union(_), do: ""
 
-  defp format(strings, indent \\ 0) do
-    if indent > 0 do
-      level =
-        case indent do
-          1 -> "    "
-          2 -> "        "
-        end
+  defp indent(string, level) do
+    indent_spacer = Application.get_env(:genus, :indent, "  ")
 
-      Enum.map(strings, &(level <> &1))
-    else
-      strings
+    case level do
+      0 ->
+        string
+
+      _ ->
+        (1..level
+         |> Enum.map(fn _ -> indent_spacer end)
+         |> Enum.reduce(&(&1 <> &2))) <>
+          string
     end
-    |> Enum.filter(&(&1 != ""))
-    |> Enum.join("\n")
   end
+
+  defp format(strings, level \\ 0),
+    do:
+      Enum.map(strings, &indent(&1, level))
+      |> Enum.filter(&(&1 != ""))
+      |> Enum.join("\n")
 
   defp get_defaults(field) do
     case field do
@@ -93,12 +98,11 @@ defmodule Genus do
 
   defp build(name, fields) do
     directory = Application.get_env(:genus, :directory, "ts")
-
     imports = Enum.map(fields, &as_import/1) |> format()
     unions = Enum.map(fields, &as_union/1) |> format()
 
-    interface = "\nexport interface #{name} {"
-    contents = (Enum.map(fields, &as_ts/1) |> format(1)) <> "\n}\n"
+    interface =
+      "\nexport interface #{name} {\n" <> (Enum.map(fields, &as_ts/1) |> format(1)) <> "\n}\n"
 
     apply = "export const apply_#{Macro.underscore(name)} = (v: any): #{name} => v\n"
 
@@ -108,15 +112,17 @@ defmodule Genus do
       |> Enum.join(", ")
 
     generator =
-      "export const new_#{Macro.underscore(name)} = (#{required}): #{name} => {\n    return {\n" <>
+      "export const new_#{Macro.underscore(name)} = (#{required}): #{name} => {\n" <>
+        ("return {\n" |> indent(1)) <>
         (Enum.map(fields, &format_struct/1) |> Enum.map(&js_literal/1) |> format(2)) <>
-        "\n    }\n}"
+        "\n" <>
+        indent("}\n", 1) <> "}"
 
     File.mkdir_p!(directory)
 
     File.write!(
       Path.join(directory, name <> ".ts"),
-      Enum.join([imports, unions, interface, contents, apply, generator], "\n")
+      Enum.join([imports, unions, interface, apply, generator], "\n")
     )
   end
 

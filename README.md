@@ -70,8 +70,12 @@ export const new_user = (id: string): User => {
 import Config
 
 config :genus,
-  # directory to save the write typescript code to
-  directory: "types"
+  # path directory to save the write TypeScript code to
+  # defaults to "./ts"
+  directory: "types",
+  # indent spacer for generated TypeScript
+  # defaults to "  "
+  indent: "\t"
 ```
 
 ## Types
