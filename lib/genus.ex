@@ -29,6 +29,9 @@ defmodule Genus do
   defp as_import({[_, :external, name], _default}),
     do: "import type { #{name} } from \"./#{name}\""
 
+  defp as_import({[_, :list, name], _default}) when is_binary(name),
+    do: "import type { #{name} } from \"./#{name}\""
+
   defp as_import(_), do: ""
 
   defp as_union({[name, :union, type_name, values], default}),
@@ -96,9 +99,12 @@ defmodule Genus do
     end
   end
 
-  defp build(name, fields) do
+  defp build(name, fields, other_imports) do
     directory = Application.get_env(:genus, :directory, "ts")
-    imports = Enum.map(fields, &as_import/1) |> format()
+
+    imports =
+      Enum.map(fields, &as_import/1) |> Enum.concat(other_imports) |> Enum.dedup() |> format()
+
     unions = Enum.map(fields, &as_union/1) |> format()
 
     interface =
@@ -128,12 +134,13 @@ defmodule Genus do
 
   defmacro genus(opts) do
     name = opts[:name]
+    imports = Access.get(opts, :imports, [])
 
     fields =
       opts[:fields]
       |> Enum.map(&get_defaults/1)
 
-    build(name, fields)
+    build(name, fields, imports)
 
     keys_and_defaults =
       Enum.map(fields, &format_struct/1)

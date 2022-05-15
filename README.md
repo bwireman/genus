@@ -31,6 +31,12 @@ defmodule User do
 end
 ```
 
+### Macro Options
+
+- name: Name of the generated TypeScript interface
+- imports: list of other imports to add to the generated file
+- fields: Fields and types for the Elixir struct and TypeScript interface
+
 ### Elixir output
 
 ```elixir
@@ -80,18 +86,19 @@ config :genus,
 
 ## Types
 
-| format             | Elixir type  | TS type   |
-| ------------------ | ------------ | --------- |
-| `[name, :string]`  | `String.t()` | `string`  |
-| `[name, :integer]` | `integer()`  | `number`  |
-| `[name, :float]`   | `float()`    | `number`  |
-| `[name, :bool]`    | `bool()`     | `boolean` |
-| `[name]`           | `any()`      | `any`     |
-| `[name, :external, type_name]` | `any()`  | `type_name`   |
-| `[name, :list, type_name]`     | `list()` | `type_name[]` |
-| `[name, :union, type_name, is_string, values]` | `any()` | `type_name` |
+| format                                         | Elixir type  | TS type       |
+| ---------------------------------------------- | ------------ | ------------- |
+| `[name, :string]`                              | `String.t()` | `string`      |
+| `[name, :integer]`                             | `integer()`  | `number`      |
+| `[name, :float]`                               | `float()`    | `number`      |
+| `[name, :bool]`                                | `bool()`     | `boolean`     |
+| `[name]`                                       | `any()`      | `any`         |
+| `[name, :external, type_name]`                 | `any()`      | `type_name`   |
+| `[name, :list, type_name]`                     | `list()`     | `type_name[]` |
+| `[name, :union, type_name, is_string, values]` | `any()`      | `type_name`   |
 
 #### Type Options
+
 - type_name `String.t()`: represents the TS type to use
 - is_string `bool()`: Should the union be represented as strings in TS
 - values `list()`: Values that compose the union
@@ -99,6 +106,7 @@ config :genus,
 ## Field Options
 
 ### Format
+
 ```elixir
   # wrap in a tuple and specify options
   {[type_format], option}

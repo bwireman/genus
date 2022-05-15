@@ -1,5 +1,6 @@
 defmodule GenusTest do
   use ExUnit.Case
+  alias Genus.Example
 
   test "Example" do
     ex = %Example{j: :blue, l: 2.22}

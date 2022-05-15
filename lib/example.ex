@@ -1,4 +1,4 @@
-defmodule Example do
+defmodule Genus.Example do
   use Genus
 
   defmodule E do
