@@ -1,7 +1,7 @@
 import { apply_example, new_example } from "../types/Example";
+import type { Colors } from "../types/Example";
 import { apply_e, new_e } from "../types/E";
 import { apply_f, new_f } from "../types/F";
-
 
 const default_example = {
     a: "Hello",
@@ -13,9 +13,9 @@ const default_example = {
     g: "blue",
     h: undefined,
     i: 1,
-    j: undefined,
+    j: "blue",
     k: undefined,
-    l: 3.14,
+    l: 2.22,
 };
 
 const default_e = {
@@ -32,7 +32,7 @@ const default_f = {
 };
 
 test('Generated Example.ts', () => {
-    expect(new_example()).toStrictEqual(default_example);
+    expect(new_example("blue", 2.22)).toStrictEqual(default_example);
     expect(apply_example(default_example)).toStrictEqual(default_example);
 });
 

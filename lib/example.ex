@@ -36,9 +36,9 @@ defmodule Example do
       {[:g, :union, "Colors", true, [:blue, :green, :red]], :blue},
       [:h, :union, "EF", false, ["E", "F"]],
       {[:i, :union, "Numbers", [1, 2, 3, 4, 5]], 1},
-      [:j, "Colors"],
+      {[:j, "Colors"], :required},
       [:k],
-      {[:l, :float], 3.14}
+      {[:l, :float], :required}
     ]
   )
 end

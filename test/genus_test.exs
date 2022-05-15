@@ -2,7 +2,7 @@ defmodule GenusTest do
   use ExUnit.Case
 
   test "Example" do
-    ex = %Example{}
+    ex = %Example{j: :blue, l: 2.22}
     assert ex.a == "Hello"
     assert ex.b == false
     assert ex.c == []
@@ -12,9 +12,9 @@ defmodule GenusTest do
     assert ex.g == :blue
     assert ex.h == nil
     assert ex.i == 1
-    assert ex.j == nil
+    assert ex.j == :blue
     assert ex.k == nil
-    assert ex.l == 3.14
+    assert ex.l == 2.22
   end
 
   test "E" do

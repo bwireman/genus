@@ -72,9 +72,24 @@ defmodule Genus do
     end
   end
 
-  defp js_literal({name, value}), do: "#{name}: " <> JSLiteral.literal(value) <> ","
+  defp js_literal({name, value}) do
+    value =
+      case value do
+        :required -> Atom.to_string(name)
+        _ -> JSLiteral.literal(value)
+      end
+
+    "#{name}: " <> value <> ","
+  end
 
   defp format_struct({[name | _rest], default}) when is_atom(name), do: {name, default}
+
+  defp required?(field) do
+    case field do
+      {_, :required} -> true
+      _ -> false
+    end
+  end
 
   defp build(name, fields) do
     directory = Application.get_env(:genus, :directory, "ts")
@@ -87,8 +102,13 @@ defmodule Genus do
 
     apply = "export const apply_#{Macro.underscore(name)} = (v: any): #{name} => v\n"
 
+    required =
+      Enum.filter(fields, &required?/1)
+      |> Enum.map(&as_ts/1)
+      |> Enum.join(", ")
+
     generator =
-      "export const new_#{Macro.underscore(name)} = (): #{name} => {\n    return {\n" <>
+      "export const new_#{Macro.underscore(name)} = (#{required}): #{name} => {\n    return {\n" <>
         (Enum.map(fields, &format_struct/1) |> Enum.map(&js_literal/1) |> format(2)) <>
         "\n    }\n}"
 
@@ -109,9 +129,25 @@ defmodule Genus do
 
     build(name, fields)
 
-    keys_and_defaults = Enum.map(fields, &format_struct/1)
+    keys_and_defaults =
+      Enum.map(fields, &format_struct/1)
+      |> Enum.map(fn f ->
+        case f do
+          {field, :required} -> {field, nil}
+          _ -> f
+        end
+      end)
 
-    quote bind_quoted: [keys_and_defaults: keys_and_defaults] do
+    required =
+      Enum.filter(fields, &required?/1)
+      |> Enum.map(fn field ->
+        case field do
+          {[name | _], _} -> name
+        end
+      end)
+
+    quote bind_quoted: [required: required, keys_and_defaults: keys_and_defaults] do
+      @enforce_keys required
       defstruct keys_and_defaults
     end
   end
