@@ -26,6 +26,7 @@ defmodule Genus.Example do
 
   genus(
     name: "Example",
+    imports: [F: "F"],
     fields: [
       {[:a, :string], "Hello"},
       {[:b, :bool], false},

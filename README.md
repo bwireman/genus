@@ -34,7 +34,7 @@ end
 ### Macro Options
 
 - name: Name of the generated TypeScript interface
-- imports: list of other imports to add to the generated file
+- imports: keyword of other imports and import overrides to add to the generated file
 - fields: Fields and types for the Elixir struct and TypeScript interface
 
 ### Elixir output
