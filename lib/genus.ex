@@ -14,7 +14,7 @@ defmodule Genus do
   defp as_ts({[name, :float], default}), do: "#{name}#{nullable(default)}: number"
   defp as_ts({[name, :bool], default}), do: "#{name}#{nullable(default)}: boolean"
   # external types have to be nullable
-  defp as_ts({[name, :external, kind], nil}), do: "#{name}?: #{kind}"
+  defp as_ts({[name, :external, type_name], nil}), do: "#{name}?: #{type_name}"
 
   defp as_ts({[name, :union, type_name, _is_string, _values], default}),
     do: "#{name}#{nullable(default)}: #{type_name}"
@@ -22,7 +22,7 @@ defmodule Genus do
   defp as_ts({[name, :union, type_name, values], default}),
     do: as_ts({[name, :union, type_name, false, values], default})
 
-  defp as_ts({[name, :list, kind], default}), do: "#{as_ts({[name, kind], default})}[]"
+  defp as_ts({[name, :list, type_name], default}), do: "#{as_ts({[name, type_name], default})}[]"
   defp as_ts({[name, v], default}), do: "#{name}#{nullable(default)}: #{v}"
   defp as_ts({[name], default}), do: "#{name}#{nullable(default)}: any"
 
