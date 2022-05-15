@@ -25,3 +25,4 @@ genus-*.tar
 # Temporary files, for example, from tests.
 /tmp/
 types/
+node_modules/

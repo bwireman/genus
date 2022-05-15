@@ -11,6 +11,7 @@ defmodule Genus do
 
   defp as_ts({[name, :string], default}), do: "#{name}#{nullable(default)}: string"
   defp as_ts({[name, :integer], default}), do: "#{name}#{nullable(default)}: number"
+  defp as_ts({[name, :float], default}), do: "#{name}#{nullable(default)}: number"
   defp as_ts({[name, :bool], default}), do: "#{name}#{nullable(default)}: boolean"
   # external types have to be nullable
   defp as_ts({[name, :external, kind], nil}), do: "#{name}?: #{kind}"
@@ -71,46 +72,6 @@ defmodule Genus do
     end
   end
 
-  defprotocol JSLiteral do
-    @spec literal(t) :: String.t()
-    def literal(value)
-  end
-
-  defimpl JSLiteral, for: BitString do
-    def literal(value), do: "\"#{value}\""
-  end
-
-  defimpl JSLiteral, for: String do
-    def literal(value), do: "\"#{value}\""
-  end
-
-  defimpl JSLiteral, for: Integer do
-    def literal(value), do: Integer.to_string(value)
-  end
-
-  defimpl JSLiteral, for: Atom do
-    def literal(value) do
-      case value do
-        nil -> "null"
-        true -> "true"
-        false -> "false"
-        _ -> "\"#{value}\""
-      end
-    end
-  end
-
-  defimpl JSLiteral, for: List do
-    def literal(value) do
-      "[" <> (Enum.map(value, &JSLiteral.literal/1) |> Enum.join(", ")) <> "]"
-    end
-  end
-
-  defimpl JSLiteral, for: Any do
-    def literal(value) do
-      Inspect.inspect(value, [])
-    end
-  end
-
   defp js_literal({name, value}), do: "#{name}: " <> JSLiteral.literal(value) <> ","
 
   defp format_struct({[name | _rest], default}) when is_atom(name), do: {name, default}
@@ -149,10 +110,8 @@ defmodule Genus do
     build(name, fields)
 
     keys_and_defaults = Enum.map(fields, &format_struct/1)
-    keys = Enum.map(keys_and_defaults, &elem(&1, 0))
 
-    quote bind_quoted: [keys: keys, keys_and_defaults: keys_and_defaults] do
-      @enforce_keys keys
+    quote bind_quoted: [keys_and_defaults: keys_and_defaults] do
       defstruct keys_and_defaults
     end
   end

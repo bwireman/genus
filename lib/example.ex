@@ -8,7 +8,7 @@ defmodule Example do
         [:a, :string],
         [:b, :bool],
         [:c, :integer],
-        [:e, :external, "F"]
+        [:d, :external, "F"]
       ]
     )
   end
@@ -29,15 +29,16 @@ defmodule Example do
     fields: [
       {[:a, :string], "Hello"},
       {[:b, :bool], false},
-      {[:l, :list, :bool], []},
-      {[:c, :list, "E"], []},
-      [:d, :external, "E"],
-      [:e, :external, "F"],
-      {[:colors, :union, "Colors", true, [:blue, :green, :red]], :blue},
-      [:ef, :union, "EF", false, ["E", "F"]],
-      {[:numbers, :union, "Numbers", [1, 2, 3, 4, 5]], 1},
-      [:more_colors, "Colors"],
-      [:a_val]
+      {[:c, :list, :bool], []},
+      {[:d, :list, "E"], []},
+      [:e, :external, "E"],
+      [:f, :external, "F"],
+      {[:g, :union, "Colors", true, [:blue, :green, :red]], :blue},
+      [:h, :union, "EF", false, ["E", "F"]],
+      {[:i, :union, "Numbers", [1, 2, 3, 4, 5]], 1},
+      [:j, "Colors"],
+      [:k],
+      {[:l, :float], 3.14}
     ]
   )
 end
