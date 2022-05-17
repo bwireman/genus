@@ -24,8 +24,15 @@ defmodule Genus do
   # external types have to be nullable
   defp as_ts(_is_nullable, {[name, :external, type_name], nil}), do: "#{name}?: #{type_name}"
 
-  defp as_ts(is_nullable, {[name, :union, type_name, _is_string, _values], _default}),
-    do: "#{name}#{nullable(is_nullable)}: #{type_name}"
+  defp as_ts(is_nullable, {[name, :union, type_name, _is_string, values], default}) do
+    if default == nil or default in values do
+      :ok
+    else
+      raise "Default value `#{default}`, for field `#{name}`, not found in union values"
+    end
+
+    "#{name}#{nullable(is_nullable)}: #{type_name}"
+  end
 
   defp as_ts(is_nullable, {[name, :union, type_name, values], default}),
     do: as_ts(is_nullable, {[name, :union, type_name, false, values], default})
