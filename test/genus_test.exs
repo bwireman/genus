@@ -30,6 +30,6 @@ defmodule GenusTest do
     f = %Example.F{}
     assert f.a == nil
     assert f.b == nil
-    assert f.c == nil
+    assert f.c == 1
   end
 end

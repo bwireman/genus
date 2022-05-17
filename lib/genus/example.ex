@@ -19,7 +19,7 @@ defmodule Genus.Example do
       fields: [
         [:a, :string],
         [:b, :bool],
-        [:c, :integer]
+        {[:c, :integer], 1}
       ]
     )
   end

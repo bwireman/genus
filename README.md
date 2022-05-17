@@ -64,7 +64,7 @@ export interface User {
 
 export const apply_user = (v: any): User => v
 
-export const new_user = ({ id, email, active, role }: {
+export const build_user = ({ id, email, active, role }: {
   id: string
   email?: string
   active?: boolean
@@ -77,6 +77,8 @@ export const new_user = ({ id, email, active, role }: {
     role: role || "enduser",
   }
 }
+
+export const new_user = (id: string) => build_user({ id })
 ```
 
 ### Config
@@ -95,16 +97,16 @@ config :genus,
 
 ## Types
 
-| format                                         | Elixir type  | TS type       |
-| ---------------------------------------------- | ------------ | ------------- |
-| `[name, :string]`                              | `String.t()` | `string`      |
-| `[name, :integer]`                             | `integer()`  | `number`      |
-| `[name, :float]`                               | `float()`    | `number`      |
-| `[name, :bool]`                                | `bool()`     | `boolean`     |
-| `[name]`                                       | `any()`      | `any`         |
-| `[name, :external, type_name]`                 | `any()`      | `type_name`   |
-| `[name, :list, type_name]`                     | `list()`     | `type_name[]` |
-| `[name, :union, type_name, is_string, values]` | `any()`      | `type_name`   |
+| Format                                       | Elixir type | TS type     |
+| -------------------------------------------- | ----------- | ----------- |
+| [name, :string]                              | String.t()  | string      |
+| [name, :integer]                             | integer()   | number      |
+| [name, :float]                               | float()     | number      |
+| [name, :bool]                                | bool()      | boolean     |
+| [name]                                       | any()       | any         |
+| [name, :external, type_name]                 | any()       | type_name   |
+| [name, :list, type_name]                     | list()      | type_name[] |
+| [name, :union, type_name, is_string, values] | any()       | type_name   |
 
 #### Type Options
 

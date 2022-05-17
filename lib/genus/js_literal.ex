@@ -1,30 +1,31 @@
-defprotocol JSLiteral do
+defprotocol Genus.JSLiteral do
   @spec literal(t) :: String.t()
   def literal(value)
 end
 
-defimpl JSLiteral, for: BitString do
+defimpl Genus.JSLiteral, for: BitString do
   def literal(value), do: "\"#{value}\""
 end
 
-defimpl JSLiteral, for: String do
+defimpl Genus.JSLiteral, for: String do
+  @spec literal(String.t()) :: <<_::16, _::_*8>>
   def literal(value), do: "\"#{value}\""
 end
 
-defimpl JSLiteral, for: Integer do
+defimpl Genus.JSLiteral, for: Integer do
   def literal(value), do: Integer.to_string(value)
 end
 
-defimpl JSLiteral, for: Float do
+defimpl Genus.JSLiteral, for: Float do
   def literal(value), do: Float.to_string(value)
 end
 
-defimpl JSLiteral, for: Map do
+defimpl Genus.JSLiteral, for: Map do
   def literal(value) do
     contents =
       List.zip([
-        Map.keys(value) |> Enum.map(&JSLiteral.literal/1),
-        Map.values(value) |> Enum.map(&JSLiteral.literal/1)
+        Map.keys(value) |> Enum.map(&Genus.JSLiteral.literal/1),
+        Map.values(value) |> Enum.map(&Genus.JSLiteral.literal/1)
       ])
       |> Enum.map(&(elem(&1, 0) <> ":" <> elem(&1, 1)))
       |> Enum.join(",\n")
@@ -33,7 +34,7 @@ defimpl JSLiteral, for: Map do
   end
 end
 
-defimpl JSLiteral, for: Atom do
+defimpl Genus.JSLiteral, for: Atom do
   def literal(value) do
     case value do
       nil -> "undefined"
@@ -44,13 +45,13 @@ defimpl JSLiteral, for: Atom do
   end
 end
 
-defimpl JSLiteral, for: List do
+defimpl Genus.JSLiteral, for: List do
   def literal(value) do
-    "[" <> (Enum.map(value, &JSLiteral.literal/1) |> Enum.join(", ")) <> "]"
+    "[" <> (Enum.map(value, &Genus.JSLiteral.literal/1) |> Enum.join(", ")) <> "]"
   end
 end
 
-defimpl JSLiteral, for: Any do
+defimpl Genus.JSLiteral, for: Any do
   def literal(value) do
     Inspect.inspect(value, [])
   end
