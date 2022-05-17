@@ -32,16 +32,16 @@ const default_f = {
 };
 
 test('Generated Example.ts', () => {
-    expect(new_example("blue", 2.22)).toStrictEqual(default_example);
+    expect(new_example({j: "blue", l: 2.22})).toStrictEqual(default_example);
     expect(apply_example(default_example)).toStrictEqual(default_example);
 });
 
 test('Generated E.ts', () => {
-    expect(new_e()).toStrictEqual(default_e);
+    expect(new_e({})).toStrictEqual(default_e);
     expect(apply_e(default_e)).toStrictEqual(default_e);
 });
 
 test('Generated F.ts', () => {
-    expect(new_f()).toStrictEqual(default_f);
+    expect(new_f({})).toStrictEqual(default_f);
     expect(apply_f(default_f)).toStrictEqual(default_f);
 });

@@ -6,25 +6,35 @@ defmodule Genus do
     end
   end
 
-  defp nullable(nil), do: "?"
+  defp nullable(true), do: "?"
   defp nullable(_), do: ""
 
-  defp as_ts({[name, :string], default}), do: "#{name}#{nullable(default)}: string"
-  defp as_ts({[name, :integer], default}), do: "#{name}#{nullable(default)}: number"
-  defp as_ts({[name, :float], default}), do: "#{name}#{nullable(default)}: number"
-  defp as_ts({[name, :bool], default}), do: "#{name}#{nullable(default)}: boolean"
+  defp as_ts(is_nullable, {[name, :string], _default}),
+    do: "#{name}#{nullable(is_nullable)}: string"
+
+  defp as_ts(is_nullable, {[name, :integer], _default}),
+    do: "#{name}#{nullable(is_nullable)}: number"
+
+  defp as_ts(is_nullable, {[name, :float], _default}),
+    do: "#{name}#{nullable(is_nullable)}: number"
+
+  defp as_ts(is_nullable, {[name, :bool], _default}),
+    do: "#{name}#{nullable(is_nullable)}: boolean"
+
   # external types have to be nullable
-  defp as_ts({[name, :external, type_name], nil}), do: "#{name}?: #{type_name}"
+  defp as_ts(_is_nullable, {[name, :external, type_name], nil}), do: "#{name}?: #{type_name}"
 
-  defp as_ts({[name, :union, type_name, _is_string, _values], default}),
-    do: "#{name}#{nullable(default)}: #{type_name}"
+  defp as_ts(is_nullable, {[name, :union, type_name, _is_string, _values], _default}),
+    do: "#{name}#{nullable(is_nullable)}: #{type_name}"
 
-  defp as_ts({[name, :union, type_name, values], default}),
-    do: as_ts({[name, :union, type_name, false, values], default})
+  defp as_ts(is_nullable, {[name, :union, type_name, values], default}),
+    do: as_ts(is_nullable, {[name, :union, type_name, false, values], default})
 
-  defp as_ts({[name, :list, type_name], default}), do: "#{as_ts({[name, type_name], default})}[]"
-  defp as_ts({[name, v], default}), do: "#{name}#{nullable(default)}: #{v}"
-  defp as_ts({[name], default}), do: "#{name}#{nullable(default)}: any"
+  defp as_ts(is_nullable, {[name, :list, type_name], default}),
+    do: "#{as_ts(is_nullable, {[name, type_name], default})}[]"
+
+  defp as_ts(is_nullable, {[name, v], _default}), do: "#{name}#{nullable(is_nullable)}: #{v}"
+  defp as_ts(is_nullable, {[name], _default}), do: "#{name}#{nullable(is_nullable)}: any"
 
   defp as_union({[name, :union, type_name, values], default}),
     do: as_union({[name, :union, type_name, false, values], default})
@@ -76,7 +86,7 @@ defmodule Genus do
     value =
       case value do
         :required -> Atom.to_string(name)
-        _ -> JSLiteral.literal(value)
+        _ -> "#{name} || " <> JSLiteral.literal(value)
       end
 
     "#{name}: " <> value <> ","
@@ -88,6 +98,12 @@ defmodule Genus do
     case field do
       {_, :required} -> true
       _ -> false
+    end
+  end
+
+  defp as_param(field) do
+    case field do
+      {[name | _], _} -> name
     end
   end
 
@@ -134,18 +150,19 @@ defmodule Genus do
 
     unions = Enum.map(fields, &as_union/1) |> format()
 
-    interface =
-      "\nexport interface #{name} {\n" <> (Enum.map(fields, &as_ts/1) |> format(1)) <> "\n}\n"
+    type_def = Enum.map(fields, &as_ts(elem(&1, 1) == nil, &1)) |> format(1)
+    all_nullable = Enum.map(fields, &as_ts(elem(&1, 1) != :required, &1)) |> format(1)
+
+    interface = "\nexport interface #{name} {\n" <> type_def <> "\n}\n"
 
     apply = "export const apply_#{Macro.underscore(name)} = (v: any): #{name} => v\n"
 
-    required =
-      Enum.filter(fields, &required?/1)
-      |> Enum.map(&as_ts/1)
+    parameters =
+      Enum.map(fields, &as_param/1)
       |> Enum.join(", ")
 
     generator =
-      "export const new_#{Macro.underscore(name)} = (#{required}): #{name} => {\n" <>
+      "export const new_#{Macro.underscore(name)} = ({ #{parameters} }: {\n#{all_nullable}\n}): #{name} => {\n" <>
         ("return {\n" |> indent(1)) <>
         (Enum.map(fields, &format_struct/1) |> Enum.map(&js_literal/1) |> format(2)) <>
         "\n" <>
