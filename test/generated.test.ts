@@ -1,6 +1,7 @@
 import { apply_example, new_example, build_example } from "../types/Example";
 import { apply_e, new_e, build_e } from "../types/E";
 import { apply_f, new_f, build_f } from "../types/F";
+import { apply_identifier, new_identifier, build_identifier } from "../types/Identifier";
 
 const default_example = {
     a: "Hello",
@@ -30,6 +31,10 @@ const default_f = {
     c: 1,
 };
 
+const default_identifier = {
+    id: undefined,
+};
+
 test('Generated Example.ts', () => {
     expect(build_example({ j: "blue", l: 2.22 })).toStrictEqual(default_example);
     expect(new_example("blue", 2.22)).toStrictEqual(default_example);
@@ -46,4 +51,10 @@ test('Generated F.ts', () => {
     expect(build_f({})).toStrictEqual(default_f);
     expect(new_f()).toStrictEqual(default_f);
     expect(apply_f(default_f)).toStrictEqual(default_f);
+});
+
+test('Generated Identifier.ts', () => {
+    expect(build_identifier({})).toStrictEqual(default_identifier);
+    expect(new_identifier()).toStrictEqual(default_identifier);
+    expect(apply_identifier(default_identifier)).toStrictEqual(default_identifier);
 });

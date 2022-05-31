@@ -32,4 +32,9 @@ defmodule GenusTest do
     assert f.b == nil
     assert f.c == 1
   end
+
+  test "Indentifier" do
+    id = %Example.Identifier{}
+    assert id.id == nil
+  end
 end

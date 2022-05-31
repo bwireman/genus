@@ -1,5 +1,6 @@
 defmodule Genus do
   alias Genus.Parse
+
   defmacro __using__(_) do
     quote do
       def field(_), do: nil
@@ -134,14 +135,18 @@ defmodule Genus do
     )
   end
 
-  defmacro tschema(opts \\ [], do: fields) do
+  defmacro tschema(opts \\ [], do: block) do
     name = Access.get(opts, :name)
     imports = Access.get(opts, :imports, [])
 
+    fields =
+      case block do
+        {:__block__, _, fields} -> fields |> Enum.map(&elem(&1, 2))
+        {:field, _, fields} -> [fields]
+      end
+
     parsed =
       fields
-      |> elem(2)
-      |> Enum.map(&elem(&1, 2))
       |> Enum.map(fn args ->
         if List.last(args) |> Keyword.keyword?() do
           args

@@ -10,6 +10,12 @@ defmodule Genus.Example do
     end
   end
 
+  defmodule Identifier do
+    tschema name: "Identifier" do
+      field(:id, :integer)
+    end
+  end
+
   defmodule F do
     tschema name: "F" do
       field(:a, :string)
