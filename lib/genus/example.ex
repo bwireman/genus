@@ -7,12 +7,7 @@ defmodule Genus.Example do
       field(:b, :bool)
       field(:c, :integer)
       field(:d, :external, "F")
-    end
-  end
-
-  defmodule Identifier do
-    tschema name: "Identifier" do
-      field(:id, :integer)
+      field(:fizz, :union, "FizzBuzz", true, [:fizz, :buzz, :fizz_buzz], default: :fizz)
     end
   end
 
@@ -24,7 +19,13 @@ defmodule Genus.Example do
     end
   end
 
-  tschema name: "Example", imports: [F: "F"] do
+  defmodule Identifier do
+    tschema do
+      field(:id, :integer)
+    end
+  end
+
+  tschema name: "Example", imports: [F: "F", FizzBuzz: "E"] do
     field(:a, :string, default: "Hello")
     field(:b, :bool, default: false)
     field(:c, :list, :bool, default: [])
@@ -37,5 +38,6 @@ defmodule Genus.Example do
     field(:j, "Colors", required: true)
     field(:k)
     field(:l, :float, required: true)
+    field(:m, "FizzBuzz")
   end
 end

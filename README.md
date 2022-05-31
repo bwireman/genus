@@ -29,7 +29,7 @@ end
 
 ### Macro Options
 
-- name: Name of the generated TypeScript interface
+- name: Name of the generated TypeScript interface, defaults to the last piece of the module name
 - imports: keyword of other imports and import overrides to add to the generated file
 
 ### Elixir output

@@ -16,6 +16,7 @@ const default_example = {
     j: "blue",
     k: undefined,
     l: 2.22,
+    m: undefined
 };
 
 const default_e = {
@@ -23,6 +24,7 @@ const default_e = {
     b: undefined,
     c: undefined,
     d: undefined,
+    fizz: "fizz"
 };
 
 const default_f = {

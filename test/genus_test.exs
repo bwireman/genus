@@ -16,6 +16,7 @@ defmodule GenusTest do
     assert ex.j == :blue
     assert ex.k == nil
     assert ex.l == 2.22
+    assert ex.m == nil
   end
 
   test "E" do

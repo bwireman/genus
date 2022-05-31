@@ -136,7 +136,13 @@ defmodule Genus do
   end
 
   defmacro tschema(opts \\ [], do: block) do
-    name = Access.get(opts, :name)
+    default_name =
+      __CALLER__.module
+      |> Atom.to_string()
+      |> String.split(".")
+      |> List.last()
+
+    name = Access.get(opts, :name, default_name)
     imports = Access.get(opts, :imports, [])
 
     fields =
