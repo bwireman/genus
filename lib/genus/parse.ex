@@ -95,9 +95,6 @@ defmodule Genus.Parse do
       required: get_required(opts)
     }
 
-  defp get_default(opts), do: Access.get(opts, :default, nil)
-  defp get_required(opts), do: Access.get(opts, :required, false)
-
   def collect(parsed, key_name, default), do: Enum.map(parsed, &Map.get(&1, key_name, default))
 
   def render_type(f = %__MODULE__{}, nullable \\ nil) do
@@ -115,13 +112,7 @@ defmodule Genus.Parse do
     end
   end
 
-  def as_param_name(f = %__MODULE__{}) do
-    f.name
-  end
-
-  def as_param_type(f = %__MODULE__{}) do
-    render_type(f, not f.required)
-  end
+  def as_param_type(f = %__MODULE__{}), do: render_type(f, not f.required)
 
   def as_return(f = %__MODULE__{}) do
     if f.required do
@@ -131,4 +122,7 @@ defmodule Genus.Parse do
       "#{f.name}: #{f.name} || #{default}"
     end
   end
+
+  defp get_default(opts), do: Access.get(opts, :default, nil)
+  defp get_required(opts), do: Access.get(opts, :required, false)
 end

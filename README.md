@@ -16,7 +16,7 @@ end
 
 ```elixir
 defmodule User do
-  # load the `genus` macro
+  # load the `tschema` macro
   use Genus
   tschema name: "User" do
     field(:id, :string, required: true)
@@ -31,7 +31,6 @@ end
 
 - name: Name of the generated TypeScript interface
 - imports: keyword of other imports and import overrides to add to the generated file
-- fields: Fields and types for the Elixir struct and TypeScript interface
 
 ### Elixir output
 

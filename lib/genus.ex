@@ -1,4 +1,5 @@
 defmodule Genus do
+  alias Genus.Parse
   defmacro __using__(_) do
     quote do
       def field(_), do: nil
@@ -44,9 +45,9 @@ defmodule Genus do
   defp build_union({name, values}),
     do: "export type #{name} = " <> Enum.join(values, " | ") <> ";"
 
-  def imports(parsed, other_imports) do
+  defp imports(parsed, other_imports) do
     imports =
-      Genus.Parse.collect(parsed, :imports, [])
+      Parse.collect(parsed, :imports, [])
       |> List.flatten()
       |> Enum.map(&build_import({&1, &1}))
 
@@ -59,33 +60,33 @@ defmodule Genus do
     |> Enum.join("\n")
   end
 
-  def other_types(parsed),
+  defp other_types(parsed),
     do:
-      Genus.Parse.collect(parsed, :type_definitions, [])
+      Parse.collect(parsed, :type_definitions, [])
       |> List.flatten()
       |> Enum.map(&build_union/1)
       |> Enum.join("\n")
 
-  def interface(name, parsed) do
+  defp interface(name, parsed) do
     fields =
       parsed
-      |> Enum.map(&Genus.Parse.render_type/1)
+      |> Enum.map(&Parse.render_type/1)
       |> format(level: 1)
 
     "export interface #{name} {\n#{fields}\n}"
   end
 
-  def functions(name, parsed) do
+  defp functions(name, parsed) do
     snake_case_name = Macro.underscore(name)
     apply = "export const apply_#{snake_case_name} = (v: any): #{name} => v"
 
-    params = Enum.map(parsed, &Genus.Parse.as_param_name(&1)) |> Enum.join(", ")
+    params = Enum.map(parsed, & &1.name) |> Enum.join(", ")
 
     param_types =
-      Enum.map(parsed, &Genus.Parse.as_param_type(&1))
+      Enum.map(parsed, &Parse.as_param_type(&1))
       |> format(level: 1)
 
-    return = Enum.map(parsed, &Genus.Parse.as_return(&1)) |> format(level: 2, seperator: ",\n")
+    return = Enum.map(parsed, &Parse.as_return(&1)) |> format(level: 2, seperator: ",\n")
 
     build =
       "export const build_#{snake_case_name} = ({ #{params} } : {\n#{param_types}\n}): #{name} => {\n  return {\n#{return}\n  }\n}"
@@ -96,12 +97,12 @@ defmodule Genus do
 
     new_params =
       required
-      |> Enum.map(&Genus.Parse.render_type/1)
+      |> Enum.map(&Parse.render_type/1)
       |> Enum.join(", ")
 
     new_vals =
       required
-      |> Enum.map(&Genus.Parse.as_param_name/1)
+      |> Enum.map(& &1.name)
       |> Enum.join(", ")
 
     new =
@@ -148,7 +149,7 @@ defmodule Genus do
           args ++ [[]]
         end
       end)
-      |> Enum.map(&Genus.Parse.parse/1)
+      |> Enum.map(&Parse.parse/1)
 
     content = build(name, parsed, imports, __CALLER__.module)
     write!(name, content)
@@ -156,7 +157,7 @@ defmodule Genus do
     required =
       parsed
       |> Enum.filter(& &1.required)
-      |> Genus.Parse.collect(:atom, nil)
+      |> Parse.collect(:atom, nil)
 
     keys_and_defaults =
       parsed
