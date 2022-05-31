@@ -18,16 +18,12 @@ end
 defmodule User do
   # load the `genus` macro
   use Genus
-  genus(
-    name: "User",
-    fields: [
-      # formats {[name, type], required | default_value}
-      {[:id, :string], :required},
-      [:email, :string],
-      {[:active, :bool], false},
-      {[:role, :union, "Role", true, [:enduser, :admin, :superuser]], :enduser}
-    ]
-  )
+  tschema name: "User" do
+    field(:id, :string, required: true)
+    field(:email, :string)
+    field(:active, :bool, default: false)
+    field(:role, :union, "Role", true, [:enduser, :admin, :superuser], default: :enduser)
+  end
 end
 ```
 
@@ -98,14 +94,14 @@ config :genus,
 
 | Format                                       | Elixir type | TS type     |
 | -------------------------------------------- | ----------- | ----------- |
-| [name, :string]                              | String.t()  | string      |
-| [name, :integer]                             | integer()   | number      |
-| [name, :float]                               | float()     | number      |
-| [name, :bool]                                | bool()      | boolean     |
-| [name]                                       | any()       | any         |
-| [name, :external, type_name]                 | any()       | type_name   |
-| [name, :list, type_name]                     | list()      | type_name[] |
-| [name, :union, type_name, is_string, values] | any()       | type_name   |
+| (name, :string)                              | String.t()  | string      |
+| (name, :integer)                             | integer()   | number      |
+| (name, :float)                               | float()     | number      |
+| (name, :bool)                                | bool()      | boolean     |
+| (name)                                       | any()       | any         |
+| (name, :external, type_name)                 | any()       | type_name   |
+| (name, :list, type_name)                     | list()      | type_name[] |
+| (name, :union, type_name, is_string, values) | any()       | type_name   |
 
 #### Type Options
 
@@ -115,13 +111,6 @@ config :genus,
 
 ## Field Options
 
-### Format
+#### `default: value` | `required: true|false`
 
-```elixir
-  # wrap in a tuple and specify options
-  {[type_format], option}
-```
-
-#### `default` | `:required`
-
-Fields default to being optional and with a `nil` default in Elixir and nullable with a default of `undefined` in TypeScript. If you specify a value that will be the default value in both Elixir and Typescript. You can also specify `:required` and mark the field as required in both the Elixir struct and the generator function
+Fields default to being optional and with a `nil` default in Elixir and nullable with a default of `undefined` in TypeScript. If you specify a value that will be the default value in both Elixir and Typescript. You can also specify `required:` and mark the field as required in both the Elixir struct and the generator function
