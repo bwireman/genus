@@ -66,31 +66,29 @@ defmodule Genus do
       |> Enum.map(&build_union/1)
       |> Enum.join("\n")
 
-  def interface(parsed),
-    do:
-      Genus.Parse.collect(parsed, :type_definitions, [])
-      |> List.flatten()
-      |> Enum.map(&build_union/1)
-      |> Enum.join("\n")
+  def interface(name, parsed) do
+    fields =
+      parsed
+      |> Enum.map(&Genus.Parse.render_type/1)
+      |> format(level: 1)
 
-  def interface(name, parsed),
-    do:
-      "export interface #{name} {\n" <>
-        (parsed
-         |> Enum.map(&Genus.Parse.render_type/1)
-         |> Enum.join("\n")) <>
-        "\n}"
+    "export interface #{name} {\n#{fields}\n}"
+  end
 
   def functions(name, parsed) do
     snake_case_name = Macro.underscore(name)
     apply = "export const apply_#{snake_case_name} = (v: any): #{name} => v"
 
     params = Enum.map(parsed, &Genus.Parse.as_param_name(&1)) |> Enum.join(", ")
-    param_types = Enum.map(parsed, &Genus.Parse.as_param_type(&1)) |> Enum.join(",\n")
-    return = Enum.map(parsed, &Genus.Parse.as_return(&1)) |> Enum.join(",\n")
+
+    param_types =
+      Enum.map(parsed, &Genus.Parse.as_param_type(&1))
+      |> format(level: 1)
+
+    return = Enum.map(parsed, &Genus.Parse.as_return(&1)) |> format(level: 2, seperator: ",\n")
 
     build =
-      "export const build_#{snake_case_name} = ({ #{params} } : { #{param_types} } ): #{name} => { \n return { #{return} } }"
+      "export const build_#{snake_case_name} = ({ #{params} } : {\n#{param_types}\n}): #{name} => {\n  return {\n#{return}\n  }\n}"
 
     required =
       parsed
