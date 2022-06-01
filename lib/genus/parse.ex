@@ -1,96 +1,60 @@
 defmodule Genus.Parse do
-  @enforce_keys [:name, :atom, :type, :default, :required]
-  defstruct [:name, :atom, :type, :default, :required, imports: [], type_definitions: []]
+  @enforce_keys [:name, :atom, :type]
+  defstruct [
+    :name,
+    :atom,
+    :type,
+    default: nil,
+    required: false,
+    imports: [],
+    type_definitions: []
+  ]
 
   def parse([name, opts]),
-    do: %__MODULE__{
-      name: "#{name}",
-      atom: name,
-      type: "any",
-      default: get_default(opts),
-      required: get_required(opts)
-    }
+    do: build(name, "any", opts)
 
   def parse([name, :string, opts]),
-    do: %__MODULE__{
-      name: "#{name}",
-      atom: name,
-      type: "String",
-      default: get_default(opts),
-      required: get_required(opts)
-    }
+    do: build(name, "string", opts)
 
   def parse([name, :bool, opts]),
-    do: %__MODULE__{
-      name: "#{name}",
-      atom: name,
-      type: "boolean",
-      default: get_default(opts),
-      required: get_required(opts)
-    }
+    do: build(name, "boolean", opts)
 
   def parse([name, :float, opts]),
-    do: %__MODULE__{
-      name: "#{name}",
-      atom: name,
-      type: "number",
-      default: get_default(opts),
-      required: get_required(opts)
-    }
+    do: build(name, "number", opts)
 
   def parse([name, :integer, opts]),
-    do: %__MODULE__{
-      name: "#{name}",
-      atom: name,
-      type: "number",
-      default: get_default(opts),
-      required: get_required(opts)
-    }
+    do: build(name, "number", opts)
 
   def parse([name, :list, type, opts]),
     do: Map.update!(parse([name, type, opts]), :type, &"#{&1}[]")
 
   def parse([name, :external, type, opts]),
-    do: %__MODULE__{
-      name: "#{name}",
-      atom: name,
-      type: type,
-      default: get_default(opts),
-      required: get_required(opts),
-      imports: [type]
-    }
+    do: build(name, type, Keyword.put(opts, :imports, [type]))
 
   def parse([name, :union, type, values, opts]),
     do: parse([name, :union, type, false, values, opts])
 
   def parse([name, :union, type, is_string, values, opts]) do
-    default = get_default(opts)
+    default = Access.get(opts, :default, nil)
     check_union_values(default, values)
 
-    %__MODULE__{
-      name: "#{name}",
-      atom: name,
-      type: type,
-      default: default,
-      required: get_required(opts),
-      type_definitions:
+    opts =
+      Keyword.put(
+        opts,
+        :type_definitions,
         {type,
          if is_string do
            values |> Enum.map(&"\"#{&1}\"")
          else
            values
          end}
-    }
+      )
+
+    build(name, type, opts)
   end
 
   def parse([name, type, opts]) when is_binary(type),
-    do: %__MODULE__{
-      name: "#{name}",
-      atom: name,
-      type: type,
-      default: get_default(opts),
-      required: get_required(opts)
-    }
+    do: build(name, type, opts)
 
   def collect(parsed, key_name, default), do: Enum.map(parsed, &Map.get(&1, key_name, default))
 
@@ -120,8 +84,28 @@ defmodule Genus.Parse do
     end
   end
 
-  defp get_default(opts), do: Access.get(opts, :default, nil)
-  defp get_required(opts), do: Access.get(opts, :required, false)
+  defp build(name, type, opts) do
+    f = %__MODULE__{
+      name: "#{name}",
+      atom: name,
+      type: type
+    }
+
+    Enum.reduce(
+      opts,
+      f,
+      fn key_v, f ->
+        {k, v} = key_v
+
+        if Map.has_key?(f, k) do
+          Map.put(f, k, v)
+        else
+          f
+        end
+      end
+    )
+  end
+
   defp check_union_values(default, values) do
     if not (default == nil or Enum.member?(values, default)) do
       raise "Genus: default values for :union types must be nil or in the possible values"
