@@ -61,21 +61,17 @@ defmodule Genus.Parse do
     }
 
   def parse([name, :union, type, values, opts]),
-    do: %__MODULE__{
-      name: "#{name}",
-      atom: name,
-      type: type,
-      default: get_default(opts),
-      required: get_required(opts),
-      type_definitions: [{type, values}]
-    }
+    do: parse([name, :union, type, false, values, opts])
 
-  def parse([name, :union, type, is_string, values, opts]),
-    do: %__MODULE__{
+  def parse([name, :union, type, is_string, values, opts]) do
+    default = get_default(opts)
+    check_union_values(default, values)
+
+    %__MODULE__{
       name: "#{name}",
       atom: name,
       type: type,
-      default: get_default(opts),
+      default: default,
       required: get_required(opts),
       type_definitions:
         {type,
@@ -85,6 +81,7 @@ defmodule Genus.Parse do
            values
          end}
     }
+  end
 
   def parse([name, type, opts]) when is_binary(type),
     do: %__MODULE__{
@@ -125,4 +122,9 @@ defmodule Genus.Parse do
 
   defp get_default(opts), do: Access.get(opts, :default, nil)
   defp get_required(opts), do: Access.get(opts, :required, false)
+  defp check_union_values(default, values) do
+    if not (default == nil or Enum.member?(values, default)) do
+      raise "Genus: default values for :union types must be nil or in the possible values"
+    end
+  end
 end

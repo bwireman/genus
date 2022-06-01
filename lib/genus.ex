@@ -29,7 +29,7 @@ defmodule Genus do
     end
   end
 
-  defp format(strings, opts),
+  defp format(strings, opts \\ []),
     do:
       Enum.map(strings, &indent(&1, Access.get(opts, :level, 0)))
       |> Enum.filter(fn str ->
@@ -44,7 +44,7 @@ defmodule Genus do
   defp build_import({name, file}), do: "import type { #{name} } from \"./#{file}\""
 
   defp build_union({name, values}),
-    do: "export type #{name} = " <> Enum.join(values, " | ") <> ";"
+    do: "export type #{name} = " <> format(values, seperator: " | ") <> ";"
 
   defp imports(parsed, other_imports) do
     imports =
@@ -58,7 +58,7 @@ defmodule Genus do
 
     (imports ++ other_imports)
     |> Enum.dedup()
-    |> Enum.join("\n")
+    |> format()
   end
 
   defp other_types(parsed),
@@ -66,7 +66,7 @@ defmodule Genus do
       Parse.collect(parsed, :type_definitions, [])
       |> List.flatten()
       |> Enum.map(&build_union/1)
-      |> Enum.join("\n")
+      |> format()
 
   defp interface(name, parsed) do
     fields =
@@ -81,7 +81,9 @@ defmodule Genus do
     snake_case_name = Macro.underscore(name)
     apply = "export const apply_#{snake_case_name} = (v: any): #{name} => v"
 
-    params = Enum.map(parsed, & &1.name) |> Enum.join(", ")
+    params =
+      Enum.map(parsed, & &1.name)
+      |> format(seperator: ", ")
 
     param_types =
       Enum.map(parsed, &Parse.as_param_type(&1))
@@ -99,12 +101,12 @@ defmodule Genus do
     new_params =
       required
       |> Enum.map(&Parse.render_type/1)
-      |> Enum.join(", ")
+      |> format(seperator: ", ")
 
     new_vals =
       required
       |> Enum.map(& &1.name)
-      |> Enum.join(", ")
+      |> format(seperator: ", ")
 
     new =
       "export const new_#{snake_case_name} = (#{new_params}): #{name} => build_#{snake_case_name}({ #{new_vals} })"

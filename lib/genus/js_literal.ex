@@ -8,7 +8,6 @@ defimpl Genus.JSLiteral, for: BitString do
 end
 
 defimpl Genus.JSLiteral, for: String do
-  @spec literal(String.t()) :: <<_::16, _::_*8>>
   def literal(value), do: "\"#{value}\""
 end
 
