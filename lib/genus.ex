@@ -39,12 +39,12 @@ defmodule Genus do
           _ -> true
         end
       end)
-      |> Enum.join(Access.get(opts, :seperator, "\n"))
+      |> Enum.join(Access.get(opts, :separator, "\n"))
 
   defp build_import({name, file}), do: "import type { #{name} } from \"./#{file}\""
 
   defp build_union({name, values}),
-    do: "export type #{name} = " <> format(values, seperator: " | ") <> ";"
+    do: "export type #{name} = " <> format(values, separator: " | ") <> ";"
 
   defp imports(parsed, other_imports) do
     imports =
@@ -83,13 +83,13 @@ defmodule Genus do
 
     params =
       Enum.map(parsed, & &1.name)
-      |> format(seperator: ", ")
+      |> format(separator: ", ")
 
     param_types =
       Enum.map(parsed, &Parse.as_param_type(&1))
       |> format(level: 1)
 
-    return = Enum.map(parsed, &Parse.as_return(&1)) |> format(level: 2, seperator: ",\n")
+    return = Enum.map(parsed, &Parse.as_return(&1)) |> format(level: 2, separator: ",\n")
 
     build =
       "export const build_#{snake_case_name} = ({ #{params} } : {\n#{param_types}\n}): #{name} => {\n  return {\n#{return}\n  }\n}"
@@ -101,17 +101,17 @@ defmodule Genus do
     new_params =
       required
       |> Enum.map(&Parse.render_type/1)
-      |> format(seperator: ", ")
+      |> format(separator: ", ")
 
     new_vals =
       required
       |> Enum.map(& &1.name)
-      |> format(seperator: ", ")
+      |> format(separator: ", ")
 
     new =
       "export const new_#{snake_case_name} = (#{new_params}): #{name} => build_#{snake_case_name}({ #{new_vals} })"
 
-    format([apply, build, new], seperator: "\n\n")
+    format([apply, build, new], separator: "\n\n")
   end
 
   defp build(name, parsed, other_imports, caller_module) do
@@ -124,7 +124,7 @@ defmodule Genus do
     interface = interface(name, parsed)
     functions = functions(name, parsed)
 
-    format([header, imports, types, interface, functions], seperator: "\n\n")
+    format([header, imports, types, interface, functions], separator: "\n\n")
   end
 
   def write!(name, content) do
