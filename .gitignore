@@ -27,3 +27,4 @@ genus-*.tar
 types/
 node_modules/
 .vscode/
+test_server.js

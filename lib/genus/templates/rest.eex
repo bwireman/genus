@@ -1,0 +1,48 @@
+import type { <%= model %> } from "../<%= model %>"
+import { build_<%= lower_model %> } from "../<%= model %>"
+
+type ErrorHandler = (reason: any) => any;
+const root = "<%= host %><%= endpoint %>";
+
+const handler_wrapper = async  (resp: Response) => {
+    if (resp.status >= 400) {
+        return await Promise.reject("Status code >= 400")
+    } else {
+        return resp
+    }
+}
+
+export async function get_<%= lower_model %>(id: number, error_handler?: ErrorHandler): Promise<<%= model %>> {
+    return fetch(`${root}/${id}`)
+        .then(handler_wrapper)
+        .then(resp => resp.json())
+        .then(build_<%= lower_model %>)
+        .catch(error_handler)
+}
+
+export async function list_<%= lower_model %>(params: Map<string, string>, error_handler?: ErrorHandler): Promise<<%= model %>[]> {
+    let queries: string[] = [];
+    params.forEach((value: string, key: string) => {
+        queries.push(`${key}=${value}`)
+    });
+ 
+    return fetch(`${root}?${queries.join("&")}`)
+        .then(handler_wrapper)
+        .then(resp => resp.json())
+        .then(values => values.map(build_<%= lower_model %>))
+        .catch(error_handler)
+}
+
+export async function post_<%= lower_model %>(value: <%= model %>, error_handler?: ErrorHandler): Promise<<%= model %>> {
+    return fetch(root, { method: "POST", body: JSON.stringify(value) })
+        .then(handler_wrapper)
+        .then(resp => resp.json()).then(build_<%= lower_model %>)
+        .catch(error_handler)
+}
+
+export async function put_<%= lower_model %>(value: <%= model %>, error_handler?: ErrorHandler): Promise<<%= model %>> {
+    return fetch(root, { method: "PUT", body: JSON.stringify(value) })
+        .then(handler_wrapper)
+        .then(resp => resp.json()).then(build_<%= lower_model %>)
+        .catch(error_handler)
+}
