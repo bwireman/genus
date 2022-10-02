@@ -1,0 +1,19 @@
+<%= for enum <- enums do %>
+export type <%= enum.name %> = <%= enum.values %><% end %>
+
+export interface <%= name %> {<%= for field <- fields do %>
+  <%= field.name %><%= field.marker %>: <%= field.type %><% end %>
+}
+
+export const apply_<%= lower_name %> = (v: any): <%= name %> => v
+
+export const build_<%= lower_name %> = ({ <%= field_names %> }: {<%= for field <- fields do %>
+  <%= field.name %><%= field.marker %>: <%= field.type %><% end %>
+}): <%= name %> => {
+  return {
+    <%= for field <- fields do %><%= field.name %>: <%= if field.required do %><%= field.name %>,
+    <% else %><%= field.name %> || undefined,<% end %>
+  <% end %>}
+}
+
+export const new_<%= lower_name %> = (<%= required_field_names %>): <%= name %> => build_<%= lower_name %>({<%= required_field_names %>})

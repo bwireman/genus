@@ -1,26 +1,25 @@
-import type { <%= model %> } from "../<%= model %>"
-import { build_<%= lower_model %> } from "../<%= model %>"
+import type { <%= name %> } from "./<%= name %>"
+import { build_<%= lower_name %> } from "./<%= name %>"
 
 type ErrorHandler = (reason: any) => any;
-const root = "<%= host %><%= endpoint %>";
+const root = "<%= endpoint %>";
 
-const handler_wrapper = async  (resp: Response) => {
+const handler_wrapper = async (resp: Response) => {
     if (resp.status >= 400) {
         return await Promise.reject("Status code >= 400")
-    } else {
-        return resp
     }
+    return resp
 }
 
-export async function get_<%= lower_model %>(id: number, error_handler?: ErrorHandler): Promise<<%= model %>> {
+export async function get_<%= lower_name %>(id: number, error_handler?: ErrorHandler): Promise<<%= name %>> {
     return fetch(`${root}/${id}`)
         .then(handler_wrapper)
         .then(resp => resp.json())
-        .then(build_<%= lower_model %>)
+        .then(build_<%= lower_name %>)
         .catch(error_handler)
 }
 
-export async function list_<%= lower_model %>(params: Map<string, string>, error_handler?: ErrorHandler): Promise<<%= model %>[]> {
+export async function list_<%= lower_name %>(params: Map<string, string>, error_handler?: ErrorHandler): Promise<<%= name %>[]> {
     let queries: string[] = [];
     params.forEach((value: string, key: string) => {
         queries.push(`${key}=${value}`)
@@ -29,20 +28,20 @@ export async function list_<%= lower_model %>(params: Map<string, string>, error
     return fetch(`${root}?${queries.join("&")}`)
         .then(handler_wrapper)
         .then(resp => resp.json())
-        .then(values => values.map(build_<%= lower_model %>))
+        .then(values => values.map(build_<%= lower_name %>))
         .catch(error_handler)
 }
 
-export async function post_<%= lower_model %>(value: <%= model %>, error_handler?: ErrorHandler): Promise<<%= model %>> {
+export async function post_<%= lower_name %>(value: <%= name %>, error_handler?: ErrorHandler): Promise<<%= name %>> {
     return fetch(root, { method: "POST", body: JSON.stringify(value) })
         .then(handler_wrapper)
-        .then(resp => resp.json()).then(build_<%= lower_model %>)
+        .then(resp => resp.json()).then(build_<%= lower_name %>)
         .catch(error_handler)
 }
 
-export async function put_<%= lower_model %>(value: <%= model %>, error_handler?: ErrorHandler): Promise<<%= model %>> {
+export async function put_<%= lower_name %>(value: <%= name %>, error_handler?: ErrorHandler): Promise<<%= name %>> {
     return fetch(root, { method: "PUT", body: JSON.stringify(value) })
         .then(handler_wrapper)
-        .then(resp => resp.json()).then(build_<%= lower_model %>)
+        .then(resp => resp.json()).then(build_<%= lower_name %>)
         .catch(error_handler)
 }

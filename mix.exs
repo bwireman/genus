@@ -18,6 +18,9 @@ defmodule Genus.MixProject do
   end
 
   defp deps do
-    []
+    [
+      {:ecto_sql, "~> 3.9"},
+      {:phoenix, "~> 1.6"}
+    ]
   end
 end
