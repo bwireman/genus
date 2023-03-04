@@ -103,13 +103,13 @@ defmodule Genus do
       |> Enum.map(&Parse.render_type/1)
       |> format(separator: ", ")
 
-    new_vals =
+    new_values =
       required
       |> Enum.map(& &1.name)
       |> format(separator: ", ")
 
     new =
-      "export const new_#{snake_case_name} = (#{new_params}): #{name} => build_#{snake_case_name}({ #{new_vals} })"
+      "export const new_#{snake_case_name} = (#{new_params}): #{name} => build_#{snake_case_name}({ #{new_values} })"
 
     format([apply, build, new], separator: "\n\n")
   end

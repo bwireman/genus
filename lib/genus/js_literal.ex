@@ -52,6 +52,6 @@ end
 
 defimpl Genus.JSLiteral, for: Any do
   def literal(value) do
-    Inspect.inspect(value, [])
+    Kernel.inspect(value)
   end
 end
